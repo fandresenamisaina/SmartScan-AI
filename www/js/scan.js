@@ -1,4 +1,4 @@
-import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
+const { Camera } = window.Capacitor.Plugins;
 
 /**
  * Ouvre la caméra native pour prendre une photo d'un document.
@@ -11,11 +11,11 @@ export async function scanDocument() {
     const photo = await Camera.getPhoto({
       quality: 90,
       allowEditing: true, // permet à l'utilisateur de recadrer manuellement
-      resultType: CameraResultType.Uri,
-      source: CameraSource.Camera,
+      resultType: 'uri',
+      source: 'CAMERA',
     });
     return photo.webPath; // chemin utilisable directement dans une balise <img>
-  }catch (e) {
+  } catch (e) {
     // L'utilisateur a annulé -> Capacitor renvoie "User cancelled photos app"
     if (e && e.message && e.message.toLowerCase().includes('cancel')) {
       return null;
