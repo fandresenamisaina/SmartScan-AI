@@ -1,0 +1,175 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: -apple-system, Roboto, sans-serif;
+  }
+  
+  body {
+    background: #f4f4f7;
+    color: #1a1a2e;
+  }
+  
+  .screen {
+    display: none;
+    min-height: 100vh;
+    flex-direction: column;
+  }
+  
+  .screen.active {
+    display: flex;
+  }
+  
+  .app-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 16px;
+    background: #3f51b5;
+    color: white;
+    padding-top: env(safe-area-inset-top, 16px);
+  }
+  
+  .app-bar h1 {
+    font-size: 20px;
+  }
+  
+  .app-bar input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: white;
+    font-size: 16px;
+  }
+  
+  .icon-button {
+    background: none;
+    border: none;
+    font-size: 20px;
+    color: white;
+    cursor: pointer;
+  }
+  
+  .search-bar {
+    padding: 12px;
+  }
+  
+  .search-bar input {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 15px;
+  }
+  
+  .document-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0 12px;
+  }
+  
+  .empty-state {
+    text-align: center;
+    color: #888;
+    margin-top: 60px;
+    line-height: 1.6;
+  }
+  
+  .doc-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: white;
+    border-radius: 10px;
+    padding: 10px;
+    margin-bottom: 10px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  }
+  
+  .doc-card img {
+    width: 48px;
+    height: 48px;
+    object-fit: cover;
+    border-radius: 6px;
+  }
+  
+  .doc-card .doc-info {
+    flex: 1;
+    overflow: hidden;
+  }
+  
+  .doc-card .doc-title {
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  .doc-card .doc-preview {
+    font-size: 13px;
+    color: #777;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  .doc-card .delete-btn {
+    background: none;
+    border: none;
+    font-size: 18px;
+    color: #c0392b;
+    cursor: pointer;
+  }
+  
+  .fab {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: #3f51b5;
+    color: white;
+    border: none;
+    padding: 14px 20px;
+    border-radius: 30px;
+    font-size: 15px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    cursor: pointer;
+  }
+  
+  .result-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px;
+  }
+  
+  .result-body img {
+    width: 100%;
+    border-radius: 12px;
+    margin-bottom: 16px;
+  }
+  
+  .text-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+  
+  .text-actions button {
+    color: #1a1a2e;
+    font-size: 18px;
+  }
+  
+  .loading {
+    text-align: center;
+    color: #888;
+    padding: 24px;
+  }
+  
+  .extracted-text {
+    background: #eceef5;
+    padding: 12px;
+    border-radius: 8px;
+    white-space: pre-wrap;
+    font-family: -apple-system, Roboto, sans-serif;
+    font-size: 14px;
+  }

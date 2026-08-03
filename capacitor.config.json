@@ -1,0 +1,6 @@
+{
+  "appId": "com.tonnom.smartscanai",
+  "appName": "SmartScan AI",
+  "webDir": "www",
+  "bundledWebRuntime": false
+}
