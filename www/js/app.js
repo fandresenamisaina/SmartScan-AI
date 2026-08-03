@@ -25,7 +25,7 @@ async function renderDocumentList(query = '') {
   const docs = query ? await db.search(query) : await db.getAll();
 
   if (docs.length === 0) {
-    documentList.innerHTML = `<p class="empty-state">Aucun document pour le moment.<br>Appuie sur + pour scanner.</p>`;
+    documentList.innerHTML = `<p class="empty-state">Aucun document pour le moment.<br>Appuie sur « Scanner » en bas pour commencer.</p>`;
     return;
   }
 

@@ -15,8 +15,14 @@ export async function scanDocument() {
       source: CameraSource.Camera,
     });
     return photo.webPath; // chemin utilisable directement dans une balise <img>
-  } catch (e) {
-    // L'utilisateur a annulé, ou permission refusée
+  }catch (e) {
+    // L'utilisateur a annulé -> Capacitor renvoie "User cancelled photos app"
+    if (e && e.message && e.message.toLowerCase().includes('cancel')) {
+      return null;
+    }
+    // Toute autre erreur (permission refusée, plugin absent, etc.) : on le signale
+    console.error('Erreur caméra :', e);
+    alert('Impossible d\'ouvrir la caméra : ' + (e && e.message ? e.message : e));
     return null;
   }
 }
