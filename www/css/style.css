@@ -334,3 +334,53 @@ body {
     transition: none !important;
   }
 }
+
+/* =========================================================
+   Boutons d'action flottants
+   ========================================================= */
+.fab-group {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  z-index: 20;
+}
+
+.fab {
+  background: var(--accent);
+  color: white;
+  border: none;
+  padding: 15px 22px;
+  border-radius: 30px;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+  box-shadow: var(--shadow-md);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s ease, transform 0.15s ease;
+}
+
+.fab:hover {
+  background: var(--accent-dark);
+  transform: translateY(-1px);
+}
+
+.fab:active {
+  transform: translateY(0);
+}
+
+.fab-secondary {
+  background: white;
+  color: var(--accent-dark);
+  border: 1.5px solid var(--accent);
+  box-shadow: var(--shadow-sm);
+  padding: 15px 18px;
+}
+
+.fab-secondary:hover {
+  background: rgba(0, 0, 0, 0.03);
+  color: var(--accent-dark);
+}

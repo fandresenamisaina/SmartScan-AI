@@ -1,6 +1,6 @@
-import { scanDocument } from './scan';
-import { extractText } from './ocr';
-import { db } from './db';
+import { scanDocument } from './scan.js';
+import { extractText } from './ocr.js';
+import { db } from './db.js';
 
 /**
  * Lance la caméra puis extrait le texte de la photo obtenue.

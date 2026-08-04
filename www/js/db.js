@@ -1,4 +1,7 @@
-import { Preferences } from '@capacitor/preferences';
+// Accès direct au plugin natif exposé par Capacitor (pas d'import npm : ce projet
+// n'utilise aucun bundler, les imports "bare" comme '@capacitor/preferences' ne
+// peuvent pas être résolus par le navigateur/la WebView, ce qui cassait tout le script).
+const { Preferences } = window.Capacitor.Plugins;
 
 const STORAGE_KEY = 'smartscan_documents';
 
