@@ -2,7 +2,7 @@ workflows:
   android-workflow:
     name: SmartScan AI - Android
     max_build_duration: 30
-    environment: 
+    environment:
       node: 22
       java: 21
     scripts:
@@ -13,7 +13,6 @@ workflows:
       - name: Compiler l'APK (debug)
         script: |
           cd android
-          chmod +x gradlew
           chmod +x gradlew
           ./gradlew assembleDebug
     artifacts:

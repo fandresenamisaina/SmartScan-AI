@@ -1,4 +1,6 @@
-import { createWorker } from './vendor/tesseract.esm.min.js';
+import Tesseract from './vendor/tesseract.esm.min.js';
+
+const { createWorker } = Tesseract;
 
 /**
  * Extrait le texte d'une image avec Tesseract.js.

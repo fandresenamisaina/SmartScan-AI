@@ -1,5 +1,5 @@
 import { db } from './db.js';
-import { scanDocument } from './scan.js';
+import { scanDocument, pickFromFiles } from './scan.js';
 import { extractText } from './ocr.js';
 
 const homeScreen = document.getElementById('home-screen');
@@ -7,6 +7,7 @@ const resultScreen = document.getElementById('result-screen');
 const documentList = document.getElementById('document-list');
 const searchInput = document.getElementById('search-input');
 const scanButton = document.getElementById('scan-button');
+const importButton = document.getElementById('import-button');
 const backButton = document.getElementById('back-button');
 const saveButton = document.getElementById('save-button');
 const titleInput = document.getElementById('title-input');
@@ -57,11 +58,10 @@ function escapeHtml(str) {
 
 searchInput.addEventListener('input', () => renderDocumentList(searchInput.value));
 
-// --- Lancement du scan ---
+// --- Lancement du scan / import de fichier ---
 
-scanButton.addEventListener('click', async () => {
-  const imagePath = await scanDocument();
-  if (!imagePath) return;
+async function handleNewImage(imagePath) {
+  if (!imagePath) return; // l'utilisateur a annulé
 
   currentImagePath = imagePath;
   currentExtractedText = '';
@@ -79,6 +79,16 @@ scanButton.addEventListener('click', async () => {
   extractedTextEl.style.display = 'block';
   extractedTextEl.textContent = text || 'Aucun texte détecté sur ce document.';
   saveButton.disabled = false;
+}
+
+scanButton.addEventListener('click', async () => {
+  const imagePath = await scanDocument();
+  await handleNewImage(imagePath);
+});
+
+importButton.addEventListener('click', async () => {
+  const imagePath = await pickFromFiles();
+  await handleNewImage(imagePath);
 });
 
 // --- Sauvegarde ---
