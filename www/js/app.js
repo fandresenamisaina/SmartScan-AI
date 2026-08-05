@@ -44,11 +44,19 @@ titleInput.addEventListener('input', () => {
 });
 
 // --- Bascule entre mode Imprimé (hors ligne) et Manuscrit (en ligne) ---
+// Change l'affichage ET relance l'OCR sur l'image déjà chargée.
 
 ocrModeSelect.addEventListener('change', () => {
   const isHandwritten = ocrModeSelect.value === 'handwritten';
   modeNote.style.display = isHandwritten ? 'block' : 'none';
   printedLangRow.style.display = isHandwritten ? 'none' : 'block';
+  runOcr();
+});
+
+ocrLangSelect.addEventListener('change', () => {
+  if (ocrModeSelect.value === 'printed') {
+    runOcr();
+  }
 });
 
 // --- Écran d'accueil ---
@@ -89,7 +97,7 @@ function escapeHtml(str) {
 
 searchInput.addEventListener('input', () => renderDocumentList(searchInput.value));
 
-// --- Lancement du scan / import de fichier ---
+// --- OCR ---
 
 function updateOcrProgress(percent, statusKey) {
   ocrProgressBar.style.width = `${percent}%`;
@@ -106,20 +114,18 @@ function mapTesseractStatus(status) {
   return null;
 }
 
-async function handleNewImage(imagePath) {
-  if (!imagePath) return; // l'utilisateur a annulé
+/**
+ * Lance (ou relance) l'OCR sur l'image actuellement affichée, selon le mode
+ * choisi (Imprimé / Manuscrit). Ne touche pas au titre ni à l'image elle-même
+ * — utilisé aussi bien pour une nouvelle image que pour un changement de mode.
+ */
+async function runOcr() {
+  if (!currentImagePath) return;
 
-  currentImagePath = imagePath;
-  currentExtractedText = '';
-  titleInput.value = t('defaultTitle');
-  delete titleInput.dataset.userEdited;
-  resultImage.src = imagePath;
   ocrLoading.style.display = 'block';
   extractedTextEl.style.display = 'none';
   saveButton.disabled = true;
   updateOcrProgress(0, 'ocrStatusInit');
-
-  showScreen('result-screen');
 
   const isHandwritten = ocrModeSelect.value === 'handwritten';
 
@@ -128,10 +134,10 @@ async function handleNewImage(imagePath) {
     if (isHandwritten) {
       ocrLoadingText.textContent = t('ocrLoading');
       ocrProgressBar.style.width = '50%'; // pas de progression détaillée côté cloud
-      text = await extractTextCloud(imagePath);
+      text = await extractTextCloud(currentImagePath);
     } else {
       const ocrLang = ocrLangSelect.value || 'fra';
-      text = await extractText(imagePath, ocrLang, ({ status, progress }) => {
+      text = await extractText(currentImagePath, ocrLang, ({ status, progress }) => {
         const percent = Math.round((progress || 0) * 100);
         const statusKey = mapTesseractStatus(status);
         updateOcrProgress(percent, status && status.includes('recognizing') ? null : statusKey);
@@ -149,6 +155,19 @@ async function handleNewImage(imagePath) {
     extractedTextEl.textContent = e.message === 'OFFLINE' ? t('offlineError') : t('cloudOcrError');
     saveButton.disabled = false;
   }
+}
+
+async function handleNewImage(imagePath) {
+  if (!imagePath) return; // l'utilisateur a annulé
+
+  currentImagePath = imagePath;
+  currentExtractedText = '';
+  titleInput.value = t('defaultTitle');
+  delete titleInput.dataset.userEdited;
+  resultImage.src = imagePath;
+
+  showScreen('result-screen');
+  await runOcr();
 }
 
 scanButton.addEventListener('click', async () => {
