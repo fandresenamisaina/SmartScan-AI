@@ -12,20 +12,25 @@
   <!-- Écran d'accueil : liste des documents -->
   <div id="home-screen" class="screen active">
     <header class="app-bar">
-      <h1>SmartScan AI</h1>
+      <h1 data-i18n="appTitle">SmartScan AI</h1>
+      <select id="ui-lang-select" class="lang-select" title="Language / Langue / Fiteny">
+        <option value="fr">FR</option>
+        <option value="en">EN</option>
+        <option value="mg">MG</option>
+      </select>
     </header>
 
     <div class="search-bar">
-      <input type="text" id="search-input" placeholder="Rechercher un document..." />
+      <input type="text" id="search-input" data-i18n-placeholder="searchPlaceholder" placeholder="Rechercher un document..." />
     </div>
 
     <div id="document-list" class="document-list">
-      
-    </div><p class="empty-state">Aucun document pour le moment.<br>Appuie sur « Scanner » en bas pour commencer.</p>
+
+    </div><p class="empty-state" data-i18n="emptyState">Aucun document pour le moment.<br>Appuie sur « Scanner » en bas pour commencer.</p>
 
     <div class="fab-group">
-      <button id="import-button" class="fab fab-secondary">📁 Fichier</button>
-      <button id="scan-button" class="fab">📷 Scanner</button>
+      <button id="import-button" class="fab fab-secondary" data-i18n="importButton">📁 Fichier</button>
+      <button id="scan-button" class="fab" data-i18n="scanButton">📷 Scanner</button>
     </div>
   </div>
 
@@ -33,22 +38,45 @@
   <div id="result-screen" class="screen">
     <header class="app-bar">
       <button id="back-button" class="icon-button">←</button>
-      <input type="text" id="title-input" placeholder="Titre du document" value="Document sans titre" />
+      <input type="text" id="title-input" data-i18n-placeholder="titlePlaceholder" data-i18n-value="defaultTitle" placeholder="Titre du document" value="Document sans titre" />
       <button id="save-button" class="icon-button">✔</button>
     </header>
 
     <div class="result-body">
       <img id="result-image" src="" alt="Document scanné" />
 
-      <div class="text-header">
-        <strong>Texte détecté</strong>
-        <div class="text-actions">
-          <button id="copy-button" class="icon-button" title="Copier">📋</button>
-          <button id="share-button" class="icon-button" title="Partager">📤</button>
+      <div class="ocr-lang-picker">
+        <label for="ocr-mode-select" data-i18n="modeLabel">Type de document</label>
+        <select id="ocr-mode-select">
+          <option value="printed" data-i18n="modePrinted">Imprimé</option>
+          <option value="handwritten" data-i18n="modeHandwritten">Manuscrit</option>
+        </select>
+        <p id="mode-note" class="ocr-lang-note" data-i18n="modeHandwrittenNote" style="display:none;"></p>
+
+        <div id="printed-lang-row">
+          <label for="ocr-lang-select" data-i18n="ocrLangLabel">Langue du document</label>
+          <select id="ocr-lang-select">
+            <option value="fra" data-i18n="ocrLangFrench">Français</option>
+            <option value="eng" data-i18n="ocrLangEnglish">Anglais</option>
+          </select>
+          <p class="ocr-lang-note" data-i18n="ocrLangNote"></p>
         </div>
       </div>
 
-      <div id="ocr-loading" class="loading">Analyse du texte en cours...</div>
+      <div class="text-header">
+        <strong data-i18n="detectedTextLabel">Texte détecté</strong>
+        <div class="text-actions">
+          <button id="copy-button" class="icon-button" data-i18n-title="copyTitle" title="Copier">📋</button>
+          <button id="share-button" class="icon-button" data-i18n-title="shareTitle" title="Partager">📤</button>
+        </div>
+      </div>
+
+      <div id="ocr-loading" class="loading">
+        <div class="progress-bar-track">
+          <div id="ocr-progress-bar" class="progress-bar-fill" style="width:0%"></div>
+        </div>
+        <div id="ocr-loading-text" class="loading-text" data-i18n="ocrStatusInit">Initialisation...</div>
+      </div>
       <pre id="extracted-text" class="extracted-text" style="display:none;"></pre>
     </div>
   </div>

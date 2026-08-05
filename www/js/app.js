@@ -1,6 +1,8 @@
 import { db } from './db.js';
 import { scanDocument, pickFromFiles } from './scan.js';
 import { extractText } from './ocr.js';
+import { extractTextCloud } from './ocr-cloud.js';
+import { t, getLang, setLang, applyTranslations } from './i18n.js';
 
 const homeScreen = document.getElementById('home-screen');
 const resultScreen = document.getElementById('result-screen');
@@ -13,12 +15,41 @@ const saveButton = document.getElementById('save-button');
 const titleInput = document.getElementById('title-input');
 const resultImage = document.getElementById('result-image');
 const ocrLoading = document.getElementById('ocr-loading');
+const ocrProgressBar = document.getElementById('ocr-progress-bar');
+const ocrLoadingText = document.getElementById('ocr-loading-text');
 const extractedTextEl = document.getElementById('extracted-text');
 const copyButton = document.getElementById('copy-button');
 const shareButton = document.getElementById('share-button');
+const uiLangSelect = document.getElementById('ui-lang-select');
+const ocrLangSelect = document.getElementById('ocr-lang-select');
+const ocrModeSelect = document.getElementById('ocr-mode-select');
+const modeNote = document.getElementById('mode-note');
+const printedLangRow = document.getElementById('printed-lang-row');
 
 let currentImagePath = null;
 let currentExtractedText = '';
+
+// --- Internationalisation ---
+
+applyTranslations();
+
+uiLangSelect.value = getLang();
+uiLangSelect.addEventListener('change', () => {
+  setLang(uiLangSelect.value);
+  renderDocumentList(searchInput.value);
+});
+
+titleInput.addEventListener('input', () => {
+  titleInput.dataset.userEdited = 'true';
+});
+
+// --- Bascule entre mode Imprimé (hors ligne) et Manuscrit (en ligne) ---
+
+ocrModeSelect.addEventListener('change', () => {
+  const isHandwritten = ocrModeSelect.value === 'handwritten';
+  modeNote.style.display = isHandwritten ? 'block' : 'none';
+  printedLangRow.style.display = isHandwritten ? 'none' : 'block';
+});
 
 // --- Écran d'accueil ---
 
@@ -26,7 +57,7 @@ async function renderDocumentList(query = '') {
   const docs = query ? await db.search(query) : await db.getAll();
 
   if (docs.length === 0) {
-    documentList.innerHTML = `<p class="empty-state">Aucun document pour le moment.<br>Appuie sur « Scanner » en bas pour commencer.</p>`;
+    documentList.innerHTML = `<p class="empty-state">${t('emptyState')}</p>`;
     return;
   }
 
@@ -35,9 +66,9 @@ async function renderDocumentList(query = '') {
       <img src="${doc.imagePath}" onerror="this.style.display='none'" />
       <div class="doc-info">
         <div class="doc-title">${escapeHtml(doc.title)}</div>
-        <div class="doc-preview">${escapeHtml(doc.extractedText || 'Aucun texte détecté')}</div>
+        <div class="doc-preview">${escapeHtml(doc.extractedText || t('noTextDetected'))}</div>
       </div>
-      <button class="delete-btn" data-id="${doc.id}">🗑</button>
+      <button class="delete-btn" data-id="${doc.id}" title="${t('deleteTitle')}">🗑</button>
     </div>
   `).join('');
 
@@ -60,25 +91,64 @@ searchInput.addEventListener('input', () => renderDocumentList(searchInput.value
 
 // --- Lancement du scan / import de fichier ---
 
+function updateOcrProgress(percent, statusKey) {
+  ocrProgressBar.style.width = `${percent}%`;
+  ocrLoadingText.textContent = statusKey
+    ? t(statusKey)
+    : t('ocrProgress', { percent });
+}
+
+function mapTesseractStatus(status) {
+  if (!status) return null;
+  if (status.includes('loading language')) return 'ocrStatusLoadLang';
+  if (status.includes('initializ') || status.includes('loading')) return 'ocrStatusInit';
+  if (status.includes('recognizing')) return 'ocrStatusRecognizing';
+  return null;
+}
+
 async function handleNewImage(imagePath) {
   if (!imagePath) return; // l'utilisateur a annulé
 
   currentImagePath = imagePath;
   currentExtractedText = '';
-  titleInput.value = 'Document sans titre';
+  titleInput.value = t('defaultTitle');
+  delete titleInput.dataset.userEdited;
   resultImage.src = imagePath;
   ocrLoading.style.display = 'block';
   extractedTextEl.style.display = 'none';
   saveButton.disabled = true;
+  updateOcrProgress(0, 'ocrStatusInit');
 
   showScreen('result-screen');
 
-  const text = await extractText(imagePath);
-  currentExtractedText = text;
-  ocrLoading.style.display = 'none';
-  extractedTextEl.style.display = 'block';
-  extractedTextEl.textContent = text || 'Aucun texte détecté sur ce document.';
-  saveButton.disabled = false;
+  const isHandwritten = ocrModeSelect.value === 'handwritten';
+
+  try {
+    let text;
+    if (isHandwritten) {
+      ocrLoadingText.textContent = t('ocrLoading');
+      ocrProgressBar.style.width = '50%'; // pas de progression détaillée côté cloud
+      text = await extractTextCloud(imagePath);
+    } else {
+      const ocrLang = ocrLangSelect.value || 'fra';
+      text = await extractText(imagePath, ocrLang, ({ status, progress }) => {
+        const percent = Math.round((progress || 0) * 100);
+        const statusKey = mapTesseractStatus(status);
+        updateOcrProgress(percent, status && status.includes('recognizing') ? null : statusKey);
+      });
+    }
+
+    currentExtractedText = text;
+    ocrLoading.style.display = 'none';
+    extractedTextEl.style.display = 'block';
+    extractedTextEl.textContent = text || t('noTextOnDocument');
+    saveButton.disabled = false;
+  } catch (e) {
+    ocrLoading.style.display = 'none';
+    extractedTextEl.style.display = 'block';
+    extractedTextEl.textContent = e.message === 'OFFLINE' ? t('offlineError') : t('cloudOcrError');
+    saveButton.disabled = false;
+  }
 }
 
 scanButton.addEventListener('click', async () => {
@@ -95,7 +165,7 @@ importButton.addEventListener('click', async () => {
 
 saveButton.addEventListener('click', async () => {
   await db.insert({
-    title: titleInput.value.trim() || 'Document sans titre',
+    title: titleInput.value.trim() || t('defaultTitle'),
     imagePath: currentImagePath,
     extractedText: currentExtractedText,
   });
@@ -107,14 +177,14 @@ backButton.addEventListener('click', () => showScreen('home-screen'));
 
 copyButton.addEventListener('click', async () => {
   await navigator.clipboard.writeText(currentExtractedText);
-  alert('Texte copié');
+  alert(t('copiedAlert'));
 });
 
 shareButton.addEventListener('click', async () => {
   if (navigator.share) {
     await navigator.share({ text: currentExtractedText });
   } else {
-    alert('Le partage n\'est pas disponible sur cet appareil');
+    alert(t('shareUnavailable'));
   }
 });
 

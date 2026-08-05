@@ -355,3 +355,21 @@ body {
     transition: none !important;
   }
 }
+/* =========================================================
+   Sélecteur de langue de l'interface
+   ========================================================= */
+.lang-select {
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: var(--radius-sm);
+  padding: 6px 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  outline: none;
+}
+
+.lang-select option {
+  color: var(--ink);
+}
